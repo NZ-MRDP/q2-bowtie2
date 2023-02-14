@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "\u001b"
+description = ""
+version = "0.0.0"
+authors = ["John Chase <johnhchase@protonmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.1.0"
+flake8 = "^6.0.0"
+black = "^23.1.0"
+isort = "^5.12.0"
+codespell = "^2.2.2"
+flake8-docstrings = "^1.7.0"
+pytest = "^7.2.1"
+pyright = "^1.1.293"
+pytest-cov = "^4.0.0"
+pytest-isort = "^3.1.0"
+
+[tool.pyright]
+exclude = ["*nox*"]
+# ignore = ["reportGeneralTypeIssues"]
+# reportGeneralTypeIssues = false
+ 
+[tool.poetry.plugins."qiime2.plugins"]
+"q2-bowtie2" = "q2-bowtie2=q2_bowtie2.plugin_setup:plugin"
+
+[tool.black]
+line-length = 119
+
+[tool.isort]
+profile = "black"
