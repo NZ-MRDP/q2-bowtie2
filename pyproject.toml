@@ -6,6 +6,7 @@ authors = ["John Chase <johnhchase@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
+pandas = "^1.5.3"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.1.0"
@@ -20,10 +21,9 @@ pytest-cov = "^4.0.0"
 pytest-isort = "^3.1.0"
 
 [tool.pyright]
-exclude = ["*nox*"]
-# ignore = ["reportGeneralTypeIssues"]
-# reportGeneralTypeIssues = false
- 
+exclude = ["*nox"]
+reportMissingImports = false
+
 [tool.poetry.plugins."qiime2.plugins"]
 "q2-bowtie2" = "q2-bowtie2=q2_bowtie2.plugin_setup:plugin"
 

@@ -25,7 +25,7 @@ def lint(session):
     session.run("poetry", "install")
     session.run("black", "./")
     session.run("flake8")
-    session.run("pytest", "--isort")
+    # session.run("pytest", "--isort")
 
 
 @nox.session

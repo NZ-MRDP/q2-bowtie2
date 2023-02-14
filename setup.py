@@ -1,3 +1,5 @@
+"""QIIME 2 plugin for running Bowtie2."""
+
 from setuptools import find_packages, setup
 
 setup(

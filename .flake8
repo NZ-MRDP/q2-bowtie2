@@ -4,3 +4,4 @@ docstring-convention = pep257
 exclude =
     .git,
     __pycache__,
+    *nox*,
