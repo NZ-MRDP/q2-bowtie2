@@ -1,8 +1,9 @@
 [tool.poetry]
-name = "\u001b"
+name = "q2-bowtie2"
 description = ""
 version = "0.0.0"
 authors = ["John Chase <johnhchase@protonmail.com>"]
+packages = [{include = "q2_bowtie2"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
@@ -24,6 +25,7 @@ pytest-isort = "^3.1.0"
 exclude = ["*nox"]
 reportMissingImports = false
 
+#This doesn't seem to work, I think it is a qiime issue though
 [tool.poetry.plugins."qiime2.plugins"]
 "q2-bowtie2" = "q2-bowtie2=q2_bowtie2.plugin_setup:plugin"
 
