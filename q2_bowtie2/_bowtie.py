@@ -30,6 +30,7 @@ def build(reference_seqs: DNAFASTAFormat) -> Bowtie2IndexDirFmt:
 def align_paired(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSamplePairedEndFastqDirFmt,
+    threads: int = 1,
 ) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt,):  # type: ignore
     """align_paired.
 
@@ -67,6 +68,8 @@ def align_paired(
             aligned_path,
             "--al-conc-gz",
             unaligned_path,
+            "-p/--threads",
+            str(threads),
         ]
 
         with tempfile.NamedTemporaryFile() as temp:
@@ -85,6 +88,7 @@ def align_paired(
 def align_single(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSampleSingleEndFastqDirFmt,
+    threads: int = 1,
 ) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt):  # type: ignore
     """align_single.
 
@@ -115,6 +119,8 @@ def align_single(
             os.path.join(str(unaligned_filtered_seqs), os.path.basename(sample_path)),
             "--al-gz",
             os.path.join(str(aligned_filtered_seqs), os.path.basename(sample_path)),
+            "-p/--threads",
+            str(threads),
         ]
         with tempfile.NamedTemporaryFile() as temp:
             subprocess.run(cmd, check=True, stdout=temp)
