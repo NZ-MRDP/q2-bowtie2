@@ -40,6 +40,8 @@ def align_paired(
         bowtie_database
     demultiplexed_sequences : SingleLanePerSampleSingleEndFastqDirFmt
         demultiplexed_sequences
+    threads : int, optional
+        number of alignment threads to launch. Defaults to 1.
 
     Returns
     -------
@@ -98,6 +100,8 @@ def align_single(
         bowtie_database
     demultiplexed_sequences : SingleLanePerSampleSingleEndFastqDirFmt
         demultiplexed_sequences
+    threads : int, optional
+        number of alignment threads to launch. Defaults to 1.
 
     Returns
     -------
