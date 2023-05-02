@@ -70,7 +70,7 @@ def align_paired(
             aligned_path,
             "--al-conc-gz",
             unaligned_path,
-            "-p/--threads",
+            "--threads",
             str(threads),
         ]
 
@@ -123,7 +123,7 @@ def align_single(
             os.path.join(str(unaligned_filtered_seqs), os.path.basename(sample_path)),
             "--al-gz",
             os.path.join(str(aligned_filtered_seqs), os.path.basename(sample_path)),
-            "-p/--threads",
+            "--threads",
             str(threads),
         ]
         with tempfile.NamedTemporaryFile() as temp:
