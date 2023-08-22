@@ -1,6 +1,8 @@
 import os
+import re
 import subprocess
 import tempfile
+from typing import Optional
 
 import pandas as pd
 from q2_types.bowtie2 import Bowtie2IndexDirFmt
@@ -87,11 +89,33 @@ def align_paired(
     return aligned_filtered_seqs, unaligned_filtered_seqs, bowtie_alignment
 
 
+def extract_first_number(text: str) -> Optional[int]:
+    """
+    Extract first number in string.
+
+    Args:
+        text (str): String wherefrom a number is extracted.
+
+    Returns:
+        Optional[int]: Number extracted.
+    """
+    match = re.search(r"\d+", text)
+    if match:
+        return int(match.group())
+    else:
+        return None
+
+
 def align_single(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     threads: int = 1,
-) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt):  # type: ignore
+) -> (
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    BAMDirFmt,
+    pd.DataFrame,
+):  # type: ignore
     """align_single.
 
     Parameters
@@ -105,13 +129,14 @@ def align_single(
 
     Returns
     -------
-    (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt)
+    (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt, pd.DataFrame)
 
     """
     aligned_filtered_seqs = CasavaOneEightSingleLanePerSampleDirFmt()
     unaligned_filtered_seqs = CasavaOneEightSingleLanePerSampleDirFmt()
     bowtie_alignment = BAMDirFmt()
     df = demultiplexed_sequences.manifest.view(pd.DataFrame)
+    read_depths = []
     for sample_id, sample_path in df.itertuples():
         cmd = [
             "bowtie2",
@@ -127,8 +152,20 @@ def align_single(
             str(threads),
         ]
         with tempfile.NamedTemporaryFile() as temp:
-            subprocess.run(cmd, check=True, stdout=temp)
+            result = subprocess.run(cmd, stdout=temp, stderr=subprocess.PIPE)
+            lines = result.stderr.decode().split("\n")
+            total_reads = extract_first_number(lines[0])
+            unaligned_reads = extract_first_number(lines[2])
+            aligned_one_time_reads = extract_first_number(lines[3])
+            aligned_multiple_times_reads = extract_first_number(lines[4])
+            read_depths.append(
+                (sample_id, total_reads, unaligned_reads, aligned_one_time_reads, aligned_multiple_times_reads)
+            )
             with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
                 subprocess.run(["samtools", "view", "-bS", temp.name], check=True, stdout=bowtie_file)
-
-    return aligned_filtered_seqs, unaligned_filtered_seqs, bowtie_alignment
+    reads_df = pd.DataFrame(
+        read_depths,
+        columns=["sample_id", "reads_total", "reads_unaligned", "reads_aligned_once", "reads_aligned_multiple"],
+    )
+    reads_df = reads_df.set_index("sample_id")
+    return aligned_filtered_seqs, unaligned_filtered_seqs, bowtie_alignment, reads_df

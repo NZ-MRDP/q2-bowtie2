@@ -3,6 +3,7 @@
 import qiime2.plugin
 from q2_types.bowtie2 import Bowtie2Index
 from q2_types.feature_data import FeatureData, Sequence
+from q2_types.feature_table import FeatureTable, Frequency
 from q2_types.per_sample_sequences import (
     PairedEndSequencesWithQuality,
     SequencesWithQuality,
@@ -51,10 +52,16 @@ plugin.methods.register_function(
         ("aligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
         ("bowtie2_alignment", SampleData[AlignmentMap]),  # type: ignore
+        ("read_features", FeatureTable[Frequency]),  # type: ignore
     ],  # type: ignore
     input_descriptions={},
     parameter_descriptions={"threads": "number of alignment threads to launch"},
-    output_descriptions={},
+    output_descriptions={
+        "aligned_reads": "Fastq files with aligned reads.",
+        "unaligned_reads": "Fastq files with unaligned reads.",
+        "bowtie2_alignmant": "The bowtie2 alignment file.",
+        "read_features": "Dataframe containing the read features output by bowtie2.",
+    },
     name="bowtie2 qiime plugin",
     description=("Description of bowtie2.align"),
 )
