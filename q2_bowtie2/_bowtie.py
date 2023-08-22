@@ -1,3 +1,4 @@
+import gzip
 import os
 import subprocess
 import tempfile
@@ -91,6 +92,7 @@ def align_single(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     threads: int = 1,
+    save_alignment: bool = False,
 ) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt):  # type: ignore
     """align_single.
 
@@ -102,6 +104,8 @@ def align_single(
         demultiplexed_sequences
     threads : int, optional
         number of alignment threads to launch. Defaults to 1.
+    save_alignment : bool, optional
+        Whether to save alignment files. Defaults to False.
 
     Returns
     -------
@@ -128,6 +132,27 @@ def align_single(
         ]
         with tempfile.NamedTemporaryFile() as temp:
             subprocess.run(cmd, check=True, stdout=temp)
+        if not save_alignment:
+            file_path = os.path.basename(sample_path)
+            # Making an empty fastq file per sample
+            with gzip.open(os.path.join(str(aligned_filtered_seqs), file_path), "w") as f1:
+                pass
+            # Making an empty bam file per sample
+            tmp_sam_file = "empty.same"
+            header_content = """@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:1\tLN:8
+@PG\tID:bowtie2\tPN:bowtie2\tVN:2.3.4.1\tCL:"/usr/bin/bowtie2-align-s --wrapper basic-0 -x dummyref.fa -f dummyquery.fa"
+A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
+            with open(tmp_sam_file, "w") as header_file:
+                header_file.write(header_content)
+            with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
+                subprocess.run(
+                    ["samtools", "view", "-bS", "empty.sam"],
+                    check=True,
+                    stdout=bowtie_file,
+                )
+            os.remove(tmp_sam_file)
+
+        else:
             with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
                 subprocess.run(["samtools", "view", "-bS", temp.name], check=True, stdout=bowtie_file)
 
