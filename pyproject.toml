@@ -8,6 +8,7 @@ packages = [{include = "q2_bowtie2"}]
 [tool.poetry.dependencies]
 python = "^3.8.1"
 pandas = "^1.5.3"
+q2-types-genomics = {git = "https://github.com/bokulich-lab/q2-types-genomics.git", rev = "2022.11.0.dev0"}
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.1.0"
