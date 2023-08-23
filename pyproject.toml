@@ -27,6 +27,10 @@ pytest-isort = "^3.1.0"
 exclude = ["*nox"]
 reportMissingImports = false
 
+[build-system]
+requires = ["poetry"]
+build-backend = "poetry.masonry.api"
+
 #This doesn't seem to work, I think it is a qiime issue though
 [tool.poetry.plugins."qiime2.plugins"]
 "q2-bowtie2" = "q2-bowtie2=q2_bowtie2.plugin_setup:plugin"
