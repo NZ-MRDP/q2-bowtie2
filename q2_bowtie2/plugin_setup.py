@@ -57,10 +57,10 @@ plugin.methods.register_function(
     input_descriptions={},
     parameter_descriptions={"threads": "number of alignment threads to launch"},
     output_descriptions={
-        "aligned_reads": "Fastq files with aligned reads.",
-        "unaligned_reads": "Fastq files with unaligned reads.",
+        "aligned_reads": "Aligned reads.",
+        "unaligned_reads": "Unaligned reads.",
         "bowtie2_alignment": "The bowtie2 alignment file.",
-        "read_features": "Dataframe containing the read features output by bowtie2.",
+        "read_features": "Read features output by bowtie2.",
     },
     name="bowtie2 qiime plugin",
     description=("Description of bowtie2.align"),
