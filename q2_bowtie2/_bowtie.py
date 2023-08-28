@@ -138,7 +138,7 @@ def align_single(
             with gzip.open(os.path.join(str(aligned_filtered_seqs), file_path), "w") as f1:
                 pass
             # Making an empty bam file per sample
-            tmp_sam_file = "empty.same"
+            tmp_sam_file = "empty.sam"
             header_content = """@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:1\tLN:8
 @PG\tID:bowtie2\tPN:bowtie2\tVN:2.3.4.1\tCL:"/usr/bin/bowtie2-align-s --wrapper basic-0 -x dummyref.fa -f dummyquery.fa"
 A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
@@ -146,7 +146,7 @@ A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
                 header_file.write(header_content)
             with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
                 subprocess.run(
-                    ["samtools", "view", "-bS", "empty.sam"],
+                    ["samtools", "view", "-bS", tmp_sam_file],
                     check=True,
                     stdout=bowtie_file,
                 )
