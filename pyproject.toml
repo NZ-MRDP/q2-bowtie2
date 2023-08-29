@@ -7,7 +7,9 @@ packages = [{include = "q2_bowtie2"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-pandas = "^1.5.3"
+q2-types-genomics = {git = "https://github.com/bokulich-lab/q2-types-genomics.git", rev = "2022.11.0.dev0"}
+pandas = "1.5.2"
+numpy = "1.23.5"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.1.0"
@@ -24,6 +26,10 @@ pytest-isort = "^3.1.0"
 [tool.pyright]
 exclude = ["*nox"]
 reportMissingImports = false
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 #This doesn't seem to work, I think it is a qiime issue though
 [tool.poetry.plugins."qiime2.plugins"]
