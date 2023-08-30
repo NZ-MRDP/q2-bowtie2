@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "q2-bowtie2"
 description = ""
-version = "0.0.0"
+version = "0.0.1"
 authors = ["John Chase <johnhchase@protonmail.com>"]
 packages = [{include = "q2_bowtie2"}]
 
