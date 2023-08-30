@@ -12,7 +12,7 @@ from q2_types.per_sample_sequences import (
 )
 from q2_types.sample_data import SampleData
 from q2_types_genomics.per_sample_data._type import AlignmentMap
-from qiime2.plugin import Int
+from qiime2.plugin import Bool, Int
 
 import q2_bowtie2
 
@@ -54,7 +54,7 @@ plugin.methods.register_function(
         "bowtie_database": Bowtie2Index,
         "demultiplexed_sequences": SampleData[SequencesWithQuality],  # type: ignore
     },
-    parameters={"threads": Int},
+    parameters={"threads": Int, "save_alignment": Bool},
     outputs=[
         ("aligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
@@ -62,7 +62,10 @@ plugin.methods.register_function(
         ("read_features", FeatureTable[BowtieReadStatistics]),  # type: ignore
     ],  # type: ignore
     input_descriptions={},
-    parameter_descriptions={"threads": "number of alignment threads to launch"},
+    parameter_descriptions={
+        "threads": "number of alignment threads to launch",
+        "save_alignment": "Whether to save alignment files",
+    },
     output_descriptions={
         "aligned_reads": "Aligned reads.",
         "unaligned_reads": "Unaligned reads.",
