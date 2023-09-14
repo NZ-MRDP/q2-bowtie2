@@ -54,7 +54,7 @@ plugin.methods.register_function(
         "bowtie_database": Bowtie2Index,
         "demultiplexed_sequences": SampleData[SequencesWithQuality],  # type: ignore
     },
-    parameters={"threads": Int, "save_alignment": Bool},
+    parameters={"threads": Int, "save_alignment": Bool, "very_sensitive": Bool},
     outputs=[
         ("aligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
@@ -82,7 +82,7 @@ plugin.methods.register_function(
         "bowtie_database": Bowtie2Index,
         "demultiplexed_sequences": SampleData[PairedEndSequencesWithQuality],  # type: ignore
     },
-    parameters={"threads": Int},
+    parameters={"threads": Int, "very_sensitive": Bool},
     outputs=[
         ("aligned_reads", SampleData[PairedEndSequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[PairedEndSequencesWithQuality]),  # type: ignore
