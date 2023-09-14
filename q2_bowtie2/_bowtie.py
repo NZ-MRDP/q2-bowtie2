@@ -79,6 +79,7 @@ def align_paired(
             "--threads",
             str(threads),
         ]
+        
         if very_sensitive:
             cmd.append("--very-sensitive")
 

@@ -65,6 +65,7 @@ plugin.methods.register_function(
     parameter_descriptions={
         "threads": "number of alignment threads to launch",
         "save_alignment": "Whether to save alignment files",
+        "very_sensitive": "Whether to use the --very-sensitive flag",
     },
     output_descriptions={
         "aligned_reads": "Aligned reads.",
@@ -89,7 +90,10 @@ plugin.methods.register_function(
         ("bowtie2_alignment", SampleData[AlignmentMap]),  # type: ignore
     ],
     input_descriptions={},
-    parameter_descriptions={"threads": "number of alignment threads to launch"},
+    parameter_descriptions={
+        "threads": "number of alignment threads to launch",
+        "very_sensitive": "Whether to use the --very-sensitive flag",
+    },
     output_descriptions={},
     name="bowtie2 qiime plugin",
     description=("Description of bowtie2.align"),
