@@ -54,7 +54,7 @@ plugin.methods.register_function(
         "bowtie_database": Bowtie2Index,
         "demultiplexed_sequences": SampleData[SequencesWithQuality],  # type: ignore
     },
-    parameters={"threads": Int, "save_alignment": Bool},
+    parameters={"threads": Int, "save_alignment": Bool, "very_sensitive": Bool},
     outputs=[
         ("aligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[SequencesWithQuality]),  # type: ignore
@@ -65,6 +65,8 @@ plugin.methods.register_function(
     parameter_descriptions={
         "threads": "number of alignment threads to launch",
         "save_alignment": "Whether to save alignment files",
+        "very_sensitive": "A preset option that results in slower running, "
+        "but more sensitive and more accurate result.",
     },
     output_descriptions={
         "aligned_reads": "Aligned reads.",
@@ -82,14 +84,18 @@ plugin.methods.register_function(
         "bowtie_database": Bowtie2Index,
         "demultiplexed_sequences": SampleData[PairedEndSequencesWithQuality],  # type: ignore
     },
-    parameters={"threads": Int},
+    parameters={"threads": Int, "very_sensitive": Bool},
     outputs=[
         ("aligned_reads", SampleData[PairedEndSequencesWithQuality]),  # type: ignore
         ("unaligned_reads", SampleData[PairedEndSequencesWithQuality]),  # type: ignore
         ("bowtie2_alignment", SampleData[AlignmentMap]),  # type: ignore
     ],
     input_descriptions={},
-    parameter_descriptions={"threads": "number of alignment threads to launch"},
+    parameter_descriptions={
+        "threads": "number of alignment threads to launch",
+        "very_sensitive": "A preset option that results in slower running, "
+        "but more sensitive and more accurate result.",
+    },
     output_descriptions={},
     name="bowtie2 qiime plugin",
     description=("Description of bowtie2.align"),

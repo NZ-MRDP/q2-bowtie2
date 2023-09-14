@@ -34,6 +34,7 @@ def align_paired(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSamplePairedEndFastqDirFmt,
     threads: int = 1,
+    very_sensitive: bool = False,
 ) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt,):  # type: ignore
     """align_paired.
 
@@ -45,6 +46,8 @@ def align_paired(
         demultiplexed_sequences
     threads : int, optional
         number of alignment threads to launch. Defaults to 1.
+    very_sensitive : bool, optional
+        Whether to run bowtie2 with the very sensitive preset. Defaults to False.
 
     Returns
     -------
@@ -76,6 +79,9 @@ def align_paired(
             "--threads",
             str(threads),
         ]
+        
+        if very_sensitive:
+            cmd.append("--very-sensitive")
 
         with tempfile.NamedTemporaryFile() as temp:
             subprocess.run(cmd, check=True, stdout=temp)
@@ -112,6 +118,7 @@ def align_single(
     demultiplexed_sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     threads: int = 1,
     save_alignment: bool = False,
+    very_sensitive: bool = False,
 ) -> (
     CasavaOneEightSingleLanePerSampleDirFmt,
     CasavaOneEightSingleLanePerSampleDirFmt,
@@ -130,6 +137,8 @@ def align_single(
         number of alignment threads to launch. Defaults to 1.
     save_alignment : bool, optional
         Whether to save alignment files. Defaults to False.
+    very_sensitive : bool, optional
+        Whether to run bowtie2 with the very sensitive preset. Defaults to False.
 
     Returns
     -------
@@ -155,6 +164,10 @@ def align_single(
             "--threads",
             str(threads),
         ]
+        
+        if very_sensitive:
+            cmd.append("--very-sensitive")
+        
         with tempfile.NamedTemporaryFile() as temp:
             result = subprocess.run(cmd, stdout=temp, stderr=subprocess.PIPE)
             lines = result.stderr.decode().split("\n")
