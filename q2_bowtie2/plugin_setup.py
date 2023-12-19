@@ -5,13 +5,14 @@ import importlib
 import qiime2.plugin
 from q2_types.bowtie2 import Bowtie2Index
 from q2_types.feature_data import FeatureData, Sequence
-from q2_types.feature_table import FeatureTable, Frequency
+from q2_types.feature_table import FeatureTable
 from q2_types.per_sample_sequences import (
     PairedEndSequencesWithQuality,
     SequencesWithQuality,
 )
 from q2_types.sample_data import SampleData
 from q2_types_genomics.per_sample_data._type import AlignmentMap
+from q2_types_variant import GenBankSequence
 from qiime2.plugin import Bool, Int
 
 import q2_bowtie2
@@ -32,7 +33,7 @@ plugin = qiime2.plugin.Plugin(
 
 plugin.methods.register_function(
     function=q2_bowtie2.build,
-    inputs={"reference_seqs": FeatureData[Sequence]},  # type: ignore
+    inputs={"reference_seqs": FeatureData[Sequence | GenBankSequence]},  # type: ignore
     parameters={},
     outputs=[("bowtie_index", Bowtie2Index)],  # type: ignore
     input_descriptions={},
