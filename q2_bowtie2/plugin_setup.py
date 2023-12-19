@@ -22,7 +22,7 @@ from ._type import BowtieReadStatistics
 
 plugin = qiime2.plugin.Plugin(
     name="bowtie2",
-    version="0.0.0",
+    version="0.1.4",
     description="QIIME 2 plugin for bowtie2",
     website="https://huttenhower.sph.harvard.edu/humann/",
     package="q2_bowtie2",
