@@ -1,35 +1,34 @@
+"""Nox sessions for q2-bowtie2."""
+
 import nox
 
-# nox.options.sessions = ["test", "lint", "coverage", "typing"]
 nox.options.sessions = ["lint", "typing"]
 
 
 @nox.session(python=["3.8"])
 def test(session):
-    session.install("poetry")
-    session.run("poetry", "install")
-    session.run("pytest", "--cov-report=term-missing", "--cov=app", "app/tests")
+    """Run the test suite."""
+    session.run("uv", "sync", "--dev", external=True)
+    session.run("pytest", "--cov-report=term-missing", "--cov=q2_bowtie2", "q2_bowtie2/tests")
 
 
 @nox.session
 def coverage(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    """Report test coverage."""
+    session.run("uv", "sync", "--dev", external=True)
     session.run("coverage", "report")
 
 
 @nox.session
 def lint(session):
-    session.install("poetry")
-    session.run("poetry", "lock", "--no-update")
-    session.run("poetry", "install")
-    session.run("black", "./")
-    session.run("flake8")
-    # session.run("pytest", "--isort")
+    """Run formatting and lint checks."""
+    session.run("uv", "sync", "--dev", external=True)
+    session.run("ruff", "format", "./")
+    session.run("ruff", "check", "./")
 
 
 @nox.session
 def typing(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    """Run static type checks."""
+    session.run("uv", "sync", "--dev", external=True)
     session.run("pyright", ".")

@@ -1,23 +1,37 @@
+"""bowtie2 actions used by the QIIME 2 plugin."""
+
 import gzip
 import os
 import re
 import subprocess
 import tempfile
-from typing import Optional
+from typing import Optional, Tuple
 
 import pandas as pd
 from q2_types.bowtie2 import Bowtie2IndexDirFmt
 from q2_types.feature_data import DNAFASTAFormat
 from q2_types.per_sample_sequences import (
+    BAMDirFmt,
     CasavaOneEightSingleLanePerSampleDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt,
     SingleLanePerSampleSingleEndFastqDirFmt,
 )
-from q2_types_genomics.per_sample_data import BAMDirFmt
 
 
 def build(reference_seqs: DNAFASTAFormat) -> Bowtie2IndexDirFmt:
-    """build."""
+    """Build a Bowtie2 index from reference sequences.
+
+    Parameters
+    ----------
+    reference_seqs : DNAFASTAFormat
+        Reference sequences to index.
+
+    Returns
+    -------
+    Bowtie2IndexDirFmt
+        Bowtie2 index directory.
+
+    """
     bowtie_database = Bowtie2IndexDirFmt()
 
     cmd = [
@@ -34,27 +48,32 @@ def align_paired(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSamplePairedEndFastqDirFmt,
     threads: int = 1,
+    mode: str = "end-to-end",
+    sensitivity: str = "sensitive",
     very_sensitive: bool = False,
-) -> (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt,):  # type: ignore
-    """align_paired.
+) -> Tuple[CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt]:
+    """Align paired-end reads to a Bowtie2 index.
 
     Parameters
     ----------
     bowtie_database : Bowtie2IndexDirFmt
-        bowtie_database
-    demultiplexed_sequences : SingleLanePerSampleSingleEndFastqDirFmt
-        demultiplexed_sequences
+        Bowtie2 index to align against.
+    demultiplexed_sequences : SingleLanePerSamplePairedEndFastqDirFmt
+        Paired-end demultiplexed sequences to align.
     threads : int, optional
-        number of alignment threads to launch. Defaults to 1.
-    very_sensitive : bool, optional
-        Whether to run bowtie2 with the very sensitive preset. Defaults to False.
+        Number of alignment threads to launch. Defaults to 1.
+    mode : str, optional
+        Alignment mode, either 'end-to-end' or 'local'. Defaults to 'end-to-end'.
+    sensitivity : str, optional
+        Sensitivity preset: 'very-fast', 'fast', 'sensitive', or 'very-sensitive'.
+        Defaults to 'sensitive'.
 
     Returns
     -------
-    (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt)
+    tuple[CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt]
+        Aligned reads, unaligned reads, and BAM alignment files.
 
     """
-    """align."""
     aligned_filtered_seqs = CasavaOneEightSingleLanePerSampleDirFmt()
     unaligned_filtered_seqs = CasavaOneEightSingleLanePerSampleDirFmt()
     bowtie_alignment = BAMDirFmt()
@@ -72,20 +91,23 @@ def align_paired(
             str(fwd),
             "-2",
             str(rev),
-            "--un-conc-gz",
-            aligned_path,
             "--al-conc-gz",
+            aligned_path,
+            "--un-conc-gz",
             unaligned_path,
             "--threads",
             str(threads),
         ]
-        
         if very_sensitive:
-            cmd.append("--very-sensitive")
+            cmd.append("--very-sensitive-local" if mode == "local" else "--very-sensitive")
+        elif mode == "local":
+            cmd.append(f"--{sensitivity}-local")
+        else:
+            cmd.append(f"--{sensitivity}")
 
         with tempfile.NamedTemporaryFile() as temp:
             subprocess.run(cmd, check=True, stdout=temp)
-            with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
+            with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "wb") as bowtie_file:
                 subprocess.run(["samtools", "view", "-bS", temp.name], check=True, stdout=bowtie_file)
 
         # rename the files what they should be
@@ -117,32 +139,31 @@ def align_single(
     bowtie_database: Bowtie2IndexDirFmt,
     demultiplexed_sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     threads: int = 1,
-    save_alignment: bool = False,
+    mode: str = "end-to-end",
+    sensitivity: str = "sensitive",
+    save_alignment: bool = True,
     very_sensitive: bool = False,
-) -> (
-    CasavaOneEightSingleLanePerSampleDirFmt,
-    CasavaOneEightSingleLanePerSampleDirFmt,
-    BAMDirFmt,
-    pd.DataFrame,
-):  # type: ignore
-    """align_single.
+) -> Tuple[CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt, pd.DataFrame]:
+    """Align single-end reads to a Bowtie2 index.
 
     Parameters
     ----------
     bowtie_database : Bowtie2IndexDirFmt
-        bowtie_database
+        Bowtie2 index to align against.
     demultiplexed_sequences : SingleLanePerSampleSingleEndFastqDirFmt
-        demultiplexed_sequences
+        Single-end demultiplexed sequences to align.
     threads : int, optional
-        number of alignment threads to launch. Defaults to 1.
-    save_alignment : bool, optional
-        Whether to save alignment files. Defaults to False.
-    very_sensitive : bool, optional
-        Whether to run bowtie2 with the very sensitive preset. Defaults to False.
+        Number of alignment threads to launch. Defaults to 1.
+    mode : str, optional
+        Alignment mode, either 'end-to-end' or 'local'. Defaults to 'end-to-end'.
+    sensitivity : str, optional
+        Sensitivity preset: 'very-fast', 'fast', 'sensitive', or 'very-sensitive'.
+        Defaults to 'sensitive'.
 
     Returns
     -------
-    (CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt, pd.DataFrame)
+    tuple[CasavaOneEightSingleLanePerSampleDirFmt, CasavaOneEightSingleLanePerSampleDirFmt, BAMDirFmt, pd.DataFrame]
+        Aligned reads, unaligned reads, BAM alignment files, and per-sample read statistics.
 
     """
     aligned_filtered_seqs = CasavaOneEightSingleLanePerSampleDirFmt()
@@ -164,12 +185,15 @@ def align_single(
             "--threads",
             str(threads),
         ]
-        
         if very_sensitive:
-            cmd.append("--very-sensitive")
-        
+            cmd.append("--very-sensitive-local" if mode == "local" else "--very-sensitive")
+        elif mode == "local":
+            cmd.append(f"--{sensitivity}-local")
+        else:
+            cmd.append(f"--{sensitivity}")
+
         with tempfile.NamedTemporaryFile() as temp:
-            result = subprocess.run(cmd, stdout=temp, stderr=subprocess.PIPE)
+            result = subprocess.run(cmd, check=True, stdout=temp, stderr=subprocess.PIPE)
             lines = result.stderr.decode().split("\n")
             total_reads = extract_first_number(lines[0])
             unaligned_reads = extract_first_number(lines[2])
@@ -181,16 +205,20 @@ def align_single(
             if not save_alignment:
                 file_path = os.path.basename(sample_path)
                 # Making an empty fastq file per sample
-                with gzip.open(os.path.join(str(aligned_filtered_seqs), file_path), "w") as f1:
+                with gzip.open(os.path.join(str(aligned_filtered_seqs), file_path), "w"):
                     pass
                 # Making an empty bam file per sample
                 tmp_sam_file = "empty.sam"
-                header_content = """@HD\tVN:1.0\tSO:unsorted\n@SQ\tSN:1\tLN:8
-@PG\tID:bowtie2\tPN:bowtie2\tVN:2.3.4.1\tCL:"/usr/bin/bowtie2-align-s --wrapper basic-0 -x dummyref.fa -f dummyquery.fa"
-A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
-                with open(tmp_sam_file, "w") as header_file:
+                header_content = (
+                    "@HD\tVN:1.0\tSO:unsorted\n"
+                    "@SQ\tSN:1\tLN:8\n"
+                    '@PG\tID:bowtie2\tPN:bowtie2\tVN:2.3.4.1\tCL:"/usr/bin/bowtie2-align-s '
+                    '--wrapper basic-0 -x dummyref.fa -f dummyquery.fa"\n'
+                    "A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"
+                )
+                with open(tmp_sam_file, "w", encoding="utf-8") as header_file:
                     header_file.write(header_content)
-                with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
+                with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "wb") as bowtie_file:
                     subprocess.run(
                         ["samtools", "view", "-bS", tmp_sam_file],
                         check=True,
@@ -199,7 +227,7 @@ A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
                 os.remove(tmp_sam_file)
 
             else:
-                with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "w") as bowtie_file:
+                with open(os.path.join(str(bowtie_alignment), f"{sample_id}.bam"), "wb") as bowtie_file:
                     subprocess.run(["samtools", "view", "-bS", temp.name], check=True, stdout=bowtie_file)
     reads_df = pd.DataFrame(
         read_depths,
@@ -207,3 +235,16 @@ A\t4\t*\t0\t0\t*\t*\t0\t0\tTTTTTTTT\tIIIIIIII\tYT:Z:UU\n"""
     )
     reads_df = reads_df.set_index("sample_id")
     return aligned_filtered_seqs, unaligned_filtered_seqs, bowtie_alignment, reads_df
+
+
+align_paired.__annotations__["return"] = (
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    BAMDirFmt,
+)
+align_single.__annotations__["return"] = (
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    CasavaOneEightSingleLanePerSampleDirFmt,
+    BAMDirFmt,
+    pd.DataFrame,
+)

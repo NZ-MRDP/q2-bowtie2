@@ -2,7 +2,7 @@ import qiime2.plugin.model as model
 
 
 class BowtieReadStatsFileFormat(model.TextFileFormat):
-    """BowtieReadStatsFileFormat."""
+    """TSV file format for Bowtie2 per-sample read alignment statistics."""
 
     # TODO: Add validation
     def _validate_(self, *args):

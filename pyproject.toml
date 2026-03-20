@@ -1,42 +1,47 @@
-[tool.poetry]
+[project]
 name = "q2-bowtie2"
-description = ""
 version = "0.1.4"
-authors = ["John Chase <johnhchase@protonmail.com>"]
-packages = [{include = "q2_bowtie2"}]
+description = "QIIME 2 plugin for bowtie2"
+authors = [{name = "John Chase", email = "johnhchase@protonmail.com"}]
+requires-python = ">=3.8.1"
+dependencies = [
+    "pandas>=1.5.2",
+    "numpy>=1.23.5",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8.1"
-q2-types-genomics = {git = "https://github.com/bokulich-lab/q2-types-genomics.git", rev = "2022.11.0.dev0"}
-pandas = "1.5.2"
-numpy = "1.23.5"
+[project.entry-points."qiime2.plugins"]
+"q2-bowtie2" = "q2_bowtie2.plugin_setup:plugin"
 
-[tool.poetry.group.dev.dependencies]
-coverage = "^7.1.0"
-flake8 = "^6.0.0"
-black = "^23.1.0"
-isort = "^5.12.0"
-codespell = "^2.2.2"
-flake8-docstrings = "^1.7.0"
-pytest = "^7.2.1"
-pyright = "^1.1.293"
-pytest-cov = "^4.0.0"
-pytest-isort = "^3.1.0"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["q2_bowtie2"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.1.0",
+    "ruff>=0.3.0",
+    "codespell>=2.2.2",
+    "pytest>=7.2.1",
+    "pyright>=1.1.293",
+    "pytest-cov>=4.0.0",
+]
 
 [tool.pyright]
 exclude = ["*nox"]
 reportMissingImports = false
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-#This doesn't seem to work, I think it is a qiime issue though
-[tool.poetry.plugins."qiime2.plugins"]
-"q2-bowtie2" = "q2-bowtie2=q2_bowtie2.plugin_setup:plugin"
-
-[tool.black]
+[tool.ruff]
 line-length = 119
 
-[tool.isort]
-profile = "black"
+[tool.ruff.lint]
+select = ["E", "F", "W", "D", "I"]
+ignore = ["D203", "D213"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+known-first-party = ["q2_bowtie2"]
